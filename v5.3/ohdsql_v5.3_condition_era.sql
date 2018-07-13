@@ -13,6 +13,7 @@
 
 IF OBJECT_ID('@cdmDatabaseSchema.condition_era', 'U') IS NOT NULL DROP TABLE @cdmDatabaseSchema.condition_era;
 
+--HINT DISTRIBUTE_ON_KEY(person_id)
 WITH cteConditionTarget (condition_occurrence_id, person_id, condition_concept_id, condition_start_date, condition_end_date) AS
 (
 	SELECT
@@ -89,8 +90,6 @@ GROUP BY
 	, c.condition_start_date
 )
 --------------------------------------------------------------------------------------------------------------
-
---HINT DISTRIBUTE_ON_KEY(person_id)
 SELECT
 	person_id
 	, condition_concept_id

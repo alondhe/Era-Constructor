@@ -119,6 +119,7 @@ SELECT
 	, MIN(drug_exposure_start_date) AS dose_era_start_date
 	, dose_era_end_date
 into @cdmDatabaseSchema.dose_era
+from cteDoseEraEnds
 GROUP BY person_id, drug_concept_id, unit_concept_id, dose_value, dose_era_end_date
 ORDER BY person_id, drug_concept_id
 ;

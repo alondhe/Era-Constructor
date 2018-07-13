@@ -3,6 +3,7 @@
  */
 
 --------------------------------------------------------------------------------------------------------------
+---Adapted to Ohdsql and constrained events to those within an observation_period
 ---Adapted to PostgreSQL drug_era from Pure SQL drug_era written by Chris_Knoll: https://gist.github.com/chrisknoll/c820cc12d833db2e3d1e
 ---Upgraded to v5
 ---Uses STOCKPILE method to populate gap_days field
@@ -16,6 +17,7 @@
 
 IF OBJECT_ID('@cdmDatabaseSchema.drug_era', 'U') IS NOT NULL DROP TABLE @cdmDatabaseSchema.drug_era;
 
+--HINT DISTRIBUTE_ON_KEY(person_id)
 WITH
 ctePreDrugTarget(drug_exposure_id, person_id, ingredient_concept_id, drug_exposure_start_date, days_supply, drug_exposure_end_date) AS
 (-- Normalize DRUG_EXPOSURE_END_DATE to either the existing drug exposure end date, or add days supply, or add 1 day to the start date
@@ -191,7 +193,6 @@ GROUP BY
 	, ft.drug_exposure_count
 	, ft.days_exposed
 )
-INSERT INTO <schema>.drug_era(person_id, drug_concept_id, drug_era_start_date, drug_era_end_date, drug_exposure_count, gap_days)
 SELECT
 	person_id
 	, drug_concept_id
@@ -199,10 +200,11 @@ SELECT
 	, drug_era_end_date
 	, SUM(drug_exposure_count) AS drug_exposure_count
 	, EXTRACT(EPOCH FROM drug_era_end_date - MIN(drug_sub_exposure_start_date) - SUM(days_exposed)) / 86400 AS gap_days
+into @cdmDatabaseSchema.drug_era
 FROM cteDrugEraEnds
 GROUP BY person_id, drug_concept_id, drug_era_end_date
 ORDER BY person_id, drug_concept_id
-
+;
 /*
 SELECT
 	(

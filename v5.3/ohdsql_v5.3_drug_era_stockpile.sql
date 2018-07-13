@@ -13,6 +13,7 @@
 
 IF OBJECT_ID('@cdmDatabaseSchema.drug_era', 'U') IS NOT NULL DROP TABLE @cdmDatabaseSchema.drug_era;
 
+--HINT DISTRIBUTE_ON_KEY(person_id)
 WITH cteDrugPreTarget(drug_exposure_id, person_id, ingredient_concept_id, drug_exposure_start_date, days_supply, drug_exposure_end_date) AS
 	(
 	-- Normalize DRUG_EXPOSURE_END_DATE to either the existing drug exposure end date, or add days supply, or add 1 day to the start date
@@ -120,8 +121,6 @@ WITH cteDrugPreTarget(drug_exposure_id, person_id, ingredient_concept_id, drug_e
 	      , dt.days_of_exposure
 )
 --------------------------------------------------------------------------------------------------------------
-
---HINT DISTRIBUTE_ON_KEY(person_id)
 SELECT
 	person_id
 	, drug_concept_id
